@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a3277f1a0ea76881ff4d86a7951b9959",
+    "content-hash": "58b5bf65fa52f5a87ef29f822ab67006",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -1958,6 +1958,74 @@
                 }
             ],
             "time": "2025-08-22T14:27:06+00:00"
+        },
+        {
+            "name": "husam-tariq/filament-timepicker",
+            "version": "v3.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/husam-tariq/filament-timepicker.git",
+                "reference": "85f1127ff47f494e9457dc6195f995d878ddf281"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/husam-tariq/filament-timepicker/zipball/85f1127ff47f494e9457dc6195f995d878ddf281",
+                "reference": "85f1127ff47f494e9457dc6195f995d878ddf281",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^3.0.5",
+                "php": "^8.1",
+                "spatie/laravel-package-tools": "^1.15.0"
+            },
+            "require-dev": {
+                "nunomaduro/collision": "^7.9",
+                "orchestra/testbench": "^8.0",
+                "pestphp/pest": "^2.0",
+                "pestphp/pest-plugin-arch": "^2.0",
+                "pestphp/pest-plugin-laravel": "^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "FilamentTimePicker": "HusamTariq\\FilamentTimePicker\\Facades\\FilamentTimePicker"
+                    },
+                    "providers": [
+                        "HusamTariq\\FilamentTimePicker\\FilamentTimePickerServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "HusamTariq\\FilamentTimePicker\\": "src/",
+                    "HusamTariq\\FilamentTimePicker\\Database\\Factories\\": "database/factories/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Hussam Tariq",
+                    "email": "hu22am1@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Filament 3.x Time Picker",
+            "homepage": "https://github.com/husam-tariq/filament-timepicker",
+            "keywords": [
+                "filament",
+                "filament-timepicker",
+                "husam-tariq",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/husam-tariq/filament-timepicker/issues",
+                "source": "https://github.com/husam-tariq/filament-timepicker"
+            },
+            "time": "2025-09-10T04:20:37+00:00"
         },
         {
             "name": "kirschbaum-development/eloquent-power-joins",

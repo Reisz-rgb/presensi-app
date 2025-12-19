@@ -15,7 +15,9 @@ class Presensi extends Model
         'jam_masuk',
         'jam_keluar',
         'status',
-        'keterangan'
+        'keterangan',
+        'latitude',
+        'longitude'
     ];
 
     protected $casts = [

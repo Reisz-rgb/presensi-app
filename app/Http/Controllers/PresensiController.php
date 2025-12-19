@@ -32,7 +32,10 @@ class PresensiController extends Controller
         $request->validate([
             'pegawai_id' => 'required|exists:pegawais,id',
             'status' => 'required|in:hadir,izin,sakit,alpha',
-            'keterangan' => 'nullable|string'
+            'keterangan' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'jam_masuk_manual' => 'nullable|date_format:H:i:s'
         ]);
 
         $today = Carbon::today();
@@ -51,9 +54,14 @@ class PresensiController extends Controller
         $presensi->tanggal = $today;
         $presensi->status = $request->status;
         $presensi->keterangan = $request->keterangan;
+        $presensi->latitude = $request->latitude;
+        $presensi->longitude = $request->longitude;
         
         if ($request->status == 'hadir') {
-            $presensi->jam_masuk = Carbon::now()->format('H:i:s');
+            // Gunakan jam manual jika ada, jika tidak gunakan waktu saat ini
+            $presensi->jam_masuk = $request->jam_masuk_manual 
+                ? $request->jam_masuk_manual 
+                : Carbon::now()->format('H:i:s');
         }
         
         $presensi->save();

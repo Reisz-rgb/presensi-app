@@ -3,40 +3,50 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PegawaiResource\Pages;
-use App\Filament\Resources\PegawaiResource\RelationManagers;
 use App\Models\Pegawai;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PegawaiResource extends Resource
 {
     protected static ?string $model = Pegawai::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    
+    // Ubah nama label
+    protected static ?string $navigationLabel = 'Pegawai';
+    protected static ?string $modelLabel = 'Pegawai';
+    protected static ?string $pluralModelLabel = 'Pegawai';
+    protected static ?string $slug = 'pegawai';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('nip')
+                    ->label('NIP')
                     ->required()
+                    ->unique(ignoreRecord: true)
                     ->maxLength(255),
                 Forms\Components\TextInput::make('nama')
+                    ->label('Nama Lengkap')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('email')
+                    ->label('Email')
                     ->email()
                     ->required()
+                    ->unique(ignoreRecord: true)
                     ->maxLength(255),
                 Forms\Components\TextInput::make('jabatan')
+                    ->label('Jabatan')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('divisi')
+                    ->label('Divisi')
                     ->required()
                     ->maxLength(255),
             ]);
@@ -47,21 +57,25 @@ class PegawaiResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('nip')
-                    ->searchable(),
+                    ->label('NIP')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('nama')
-                    ->searchable(),
+                    ->label('Nama')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('email')
+                    ->label('Email')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('jabatan')
+                    ->label('Jabatan')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('divisi')
+                    ->label('Divisi')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label('Dibuat Pada')
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -70,6 +84,7 @@ class PegawaiResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

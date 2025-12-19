@@ -3,37 +3,66 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PresensiResource\Pages;
-use App\Filament\Resources\PresensiResource\RelationManagers;
 use App\Models\Presensi;
+use App\Models\Pegawai;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PresensiResource extends Resource
 {
     protected static ?string $model = Presensi::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+    
+    // Ubah nama label
+    protected static ?string $navigationLabel = 'Presensi';
+    protected static ?string $modelLabel = 'Presensi';
+    protected static ?string $pluralModelLabel = 'Presensi';
+    protected static ?string $slug = 'presensi';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('pegawai_id')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\Select::make('pegawai_id')
+                    ->label('Pegawai')
+                    ->options(Pegawai::all()->pluck('nama', 'id'))
+                    ->searchable()
+                    ->required(),
                 Forms\Components\DatePicker::make('tanggal')
-                    ->required(),
-                Forms\Components\TextInput::make('jam_masuk'),
-                Forms\Components\TextInput::make('jam_keluar'),
-                Forms\Components\TextInput::make('status')
-                    ->required(),
+                    ->label('Tanggal')
+                    ->required()
+                    ->default(now()),
+                Forms\Components\TimePicker::make('jam_masuk')
+                    ->label('Jam Masuk')
+                    ->seconds(false),
+                Forms\Components\TimePicker::make('jam_keluar')
+                    ->label('Jam Keluar')
+                    ->seconds(false),
+                Forms\Components\Select::make('status')
+                    ->label('Status')
+                    ->options([
+                        'hadir' => 'Hadir',
+                        'izin' => 'Izin',
+                        'sakit' => 'Sakit',
+                        'alpha' => 'Alpha',
+                    ])
+                    ->required()
+                    ->default('alpha'),
                 Forms\Components\Textarea::make('keterangan')
+                    ->label('Keterangan')
                     ->columnSpanFull(),
+                Forms\Components\TextInput::make('latitude')
+                    ->label('Latitude')
+                    ->numeric()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('longitude')
+                    ->label('Longitude')
+                    ->numeric()
+                    ->maxLength(255),
             ]);
     }
 
@@ -41,35 +70,65 @@ class PresensiResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('pegawai_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('pegawai.nama')
+                    ->label('Nama Pegawai')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('pegawai.nip')
+                    ->label('NIP')
+                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tanggal')
-                    ->date()
+                    ->label('Tanggal')
+                    ->date('d M Y')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('jam_masuk'),
-                Tables\Columns\TextColumn::make('jam_keluar'),
-                Tables\Columns\TextColumn::make('status'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
+                Tables\Columns\TextColumn::make('jam_masuk')
+                    ->label('Jam Masuk')
+                    ->time('H:i'),
+                Tables\Columns\TextColumn::make('jam_keluar')
+                    ->label('Jam Keluar')
+                    ->time('H:i'),
+                Tables\Columns\BadgeColumn::make('status')
+                    ->label('Status')
+                    ->colors([
+                        'success' => 'hadir',
+                        'warning' => 'izin',
+                        'danger' => 'alpha',
+                        'primary' => 'sakit',
+                    ]),
+                Tables\Columns\TextColumn::make('latitude')
+                    ->label('Lat')
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                Tables\Columns\TextColumn::make('longitude')
+                    ->label('Long')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Dibuat Pada')
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        'hadir' => 'Hadir',
+                        'izin' => 'Izin',
+                        'sakit' => 'Sakit',
+                        'alpha' => 'Alpha',
+                    ]),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('tanggal', 'desc');
     }
 
     public static function getRelations(): array

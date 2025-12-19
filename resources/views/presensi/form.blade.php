@@ -6,6 +6,10 @@
     <title>Form Presensi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Leaflet CSS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         @keyframes slideIn {
             from { opacity: 0; transform: translateX(-20px); }
@@ -13,6 +17,10 @@
         }
         .animate-slideIn {
             animation: slideIn 0.5s ease-out;
+        }
+        #map {
+            height: 300px;
+            border-radius: 0.5rem;
         }
     </style>
 </head>
@@ -77,7 +85,7 @@
                     </label>
                     <div class="grid grid-cols-2 gap-4">
                         <label class="relative">
-                            <input type="radio" name="status" value="hadir" required class="peer sr-only">
+                            <input type="radio" name="status" value="hadir" required class="peer sr-only" onchange="toggleTimePickerVisibility()">
                             <div class="w-full p-4 border-2 border-gray-300 rounded-lg cursor-pointer peer-checked:border-green-500 peer-checked:bg-green-50 transition hover:shadow-md">
                                 <div class="text-center">
                                     <i class="fas fa-check-circle text-3xl text-green-600 mb-2"></i>
@@ -87,7 +95,7 @@
                         </label>
                         
                         <label class="relative">
-                            <input type="radio" name="status" value="izin" class="peer sr-only">
+                            <input type="radio" name="status" value="izin" class="peer sr-only" onchange="toggleTimePickerVisibility()">
                             <div class="w-full p-4 border-2 border-gray-300 rounded-lg cursor-pointer peer-checked:border-yellow-500 peer-checked:bg-yellow-50 transition hover:shadow-md">
                                 <div class="text-center">
                                     <i class="fas fa-file-alt text-3xl text-yellow-600 mb-2"></i>
@@ -97,7 +105,7 @@
                         </label>
                         
                         <label class="relative">
-                            <input type="radio" name="status" value="sakit" class="peer sr-only">
+                            <input type="radio" name="status" value="sakit" class="peer sr-only" onchange="toggleTimePickerVisibility()">
                             <div class="w-full p-4 border-2 border-gray-300 rounded-lg cursor-pointer peer-checked:border-orange-500 peer-checked:bg-orange-50 transition hover:shadow-md">
                                 <div class="text-center">
                                     <i class="fas fa-procedures text-3xl text-orange-600 mb-2"></i>
@@ -107,7 +115,7 @@
                         </label>
                         
                         <label class="relative">
-                            <input type="radio" name="status" value="alpha" class="peer sr-only">
+                            <input type="radio" name="status" value="alpha" class="peer sr-only" onchange="toggleTimePickerVisibility()">
                             <div class="w-full p-4 border-2 border-gray-300 rounded-lg cursor-pointer peer-checked:border-red-500 peer-checked:bg-red-50 transition hover:shadow-md">
                                 <div class="text-center">
                                     <i class="fas fa-times-circle text-3xl text-red-600 mb-2"></i>
@@ -115,6 +123,51 @@
                                 </div>
                             </div>
                         </label>
+                    </div>
+                </div>
+
+                <!-- Time Picker (hanya muncul jika status Hadir) -->
+                <div id="timePickerSection" style="display: none;">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        <i class="fas fa-clock mr-2 text-indigo-600"></i>Jam Masuk (Opsional)
+                    </label>
+                    <input type="text" id="timePicker" name="jam_masuk_manual" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                           placeholder="Pilih waktu atau gunakan waktu saat ini">
+                    <p class="text-sm text-gray-500 mt-1">
+                        <i class="fas fa-info-circle mr-1"></i>Kosongkan untuk menggunakan waktu saat ini
+                    </p>
+                </div>
+
+                <!-- Location Picker -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        <i class="fas fa-map-marker-alt mr-2 text-indigo-600"></i>Lokasi Presensi
+                    </label>
+                    <div class="space-y-3">
+                        <button type="button" onclick="getLocation()" 
+                                class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition">
+                            <i class="fas fa-location-crosshairs mr-2"></i>Dapatkan Lokasi Saat Ini
+                        </button>
+                        
+                        <div id="map" class="shadow-lg"></div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Latitude</label>
+                                <input type="text" id="latitude" name="latitude" readonly
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                                       placeholder="-">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Longitude</label>
+                                <input type="text" id="longitude" name="longitude" readonly
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                                       placeholder="-">
+                            </div>
+                        </div>
+                        
+                        <div id="locationStatus" class="text-sm text-gray-500 text-center"></div>
                     </div>
                 </div>
 
@@ -139,8 +192,8 @@
                         <p class="text-sm text-blue-800 font-semibold mb-1">Informasi Penting:</p>
                         <ul class="text-sm text-blue-700 space-y-1">
                             <li>• Presensi hanya dapat dilakukan sekali per hari</li>
+                            <li>• Aktifkan lokasi untuk mencatat koordinat</li>
                             <li>• Pilih status kehadiran dengan benar</li>
-                            <li>• Tambahkan keterangan jika ada hal khusus</li>
                         </ul>
                     </div>
                 </div>
@@ -153,5 +206,95 @@
             <p class="text-center text-gray-600">© 2024 Sistem Presensi Pegawai. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // Initialize Time Picker
+        const timePicker = flatpickr("#timePicker", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i:S",
+            time_24hr: true,
+            defaultHour: new Date().getHours(),
+            defaultMinute: new Date().getMinutes()
+        });
+
+        // Toggle Time Picker visibility
+        function toggleTimePickerVisibility() {
+            const status = document.querySelector('input[name="status"]:checked').value;
+            const timePickerSection = document.getElementById('timePickerSection');
+            
+            if (status === 'hadir') {
+                timePickerSection.style.display = 'block';
+            } else {
+                timePickerSection.style.display = 'none';
+            }
+        }
+
+        // Initialize Map
+        let map = L.map('map').setView([-6.9666204, 110.4166495], 13); // Default: Semarang
+        let marker;
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Get current location
+        function getLocation() {
+            const statusDiv = document.getElementById('locationStatus');
+            
+            if (!navigator.geolocation) {
+                statusDiv.textContent = 'Geolocation tidak didukung oleh browser Anda';
+                statusDiv.className = 'text-sm text-red-500 text-center';
+                return;
+            }
+
+            statusDiv.textContent = 'Mengambil lokasi...';
+            statusDiv.className = 'text-sm text-blue-500 text-center';
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    updateLocation(lat, lng);
+                    statusDiv.textContent = '✓ Lokasi berhasil didapatkan';
+                    statusDiv.className = 'text-sm text-green-600 text-center font-semibold';
+                },
+                (error) => {
+                    statusDiv.textContent = 'Gagal mendapatkan lokasi. Pastikan izin lokasi diaktifkan.';
+                    statusDiv.className = 'text-sm text-red-500 text-center';
+                }
+            );
+        }
+
+        // Update location on map
+        function updateLocation(lat, lng) {
+            document.getElementById('latitude').value = lat.toFixed(8);
+            document.getElementById('longitude').value = lng.toFixed(8);
+            
+            map.setView([lat, lng], 16);
+            
+            if (marker) {
+                marker.setLatLng([lat, lng]);
+            } else {
+                marker = L.marker([lat, lng]).addTo(map);
+            }
+            
+            marker.bindPopup('<b>Lokasi Anda</b>').openPopup();
+        }
+
+        // Allow map click to set location
+        map.on('click', function(e) {
+            updateLocation(e.latlng.lat, e.latlng.lng);
+        });
+
+        //Auto-get location on page load (optional)
+        getLocation();
+    </script>
 </body>
 </html>

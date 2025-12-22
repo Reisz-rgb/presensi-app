@@ -79,7 +79,7 @@
         </div>
 
         <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
             <!-- Total Pegawai -->
             <div class="stat-card bg-white rounded-xl shadow-lg p-6 animate-fadeIn">
                 <div class="flex items-center justify-between">
@@ -106,8 +106,21 @@
                 </div>
             </div>
 
-            <!-- Izin -->
+            <!-- Terlambat -->
             <div class="stat-card bg-white rounded-xl shadow-lg p-6 animate-fadeIn" style="animation-delay: 0.2s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Terlambat</p>
+                        <p class="text-3xl font-bold text-purple-600 mt-2">{{ $terlambat }}</p>
+                    </div>
+                    <div class="bg-purple-100 p-4 rounded-full">
+                        <i class="fas fa-clock text-3xl text-purple-600"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Izin -->
+            <div class="stat-card bg-white rounded-xl shadow-lg p-6 animate-fadeIn" style="animation-delay: 0.3s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-500 text-sm font-medium">Izin</p>
@@ -120,7 +133,7 @@
             </div>
 
             <!-- Sakit -->
-            <div class="stat-card bg-white rounded-xl shadow-lg p-6 animate-fadeIn" style="animation-delay: 0.3s">
+            <div class="stat-card bg-white rounded-xl shadow-lg p-6 animate-fadeIn" style="animation-delay: 0.4s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-500 text-sm font-medium">Sakit</p>
@@ -133,7 +146,7 @@
             </div>
 
             <!-- Alpha -->
-            <div class="stat-card bg-white rounded-xl shadow-lg p-6 animate-fadeIn" style="animation-delay: 0.4s">
+            <div class="stat-card bg-white rounded-xl shadow-lg p-6 animate-fadeIn" style="animation-delay: 0.5s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-500 text-sm font-medium">Alpha</p>

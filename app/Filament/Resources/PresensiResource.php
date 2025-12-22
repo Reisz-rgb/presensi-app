@@ -17,7 +17,6 @@ class PresensiResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
     
-    // Ubah nama label
     protected static ?string $navigationLabel = 'Presensi';
     protected static ?string $modelLabel = 'Presensi';
     protected static ?string $pluralModelLabel = 'Presensi';
@@ -57,12 +56,10 @@ class PresensiResource extends Resource
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('latitude')
                     ->label('Latitude')
-                    ->numeric()
-                    ->maxLength(255),
+                    ->numeric(),
                 Forms\Components\TextInput::make('longitude')
                     ->label('Longitude')
-                    ->numeric()
-                    ->maxLength(255),
+                    ->numeric(),
             ]);
     }
 
@@ -84,10 +81,14 @@ class PresensiResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('jam_masuk')
                     ->label('Jam Masuk')
-                    ->time('H:i'),
+                    ->time('H:i')
+                    ->badge()
+                    ->color(fn ($record) => $record->is_late_check_in ? 'danger' : 'success'),
                 Tables\Columns\TextColumn::make('jam_keluar')
                     ->label('Jam Keluar')
-                    ->time('H:i'),
+                    ->time('H:i')
+                    ->badge()
+                    ->color(fn ($record) => $record->is_late_check_out ? 'danger' : 'success'),
                 Tables\Columns\BadgeColumn::make('status')
                     ->label('Status')
                     ->colors([
@@ -96,12 +97,25 @@ class PresensiResource extends Resource
                         'danger' => 'alpha',
                         'primary' => 'sakit',
                     ]),
-                Tables\Columns\TextColumn::make('latitude')
-                    ->label('Lat')
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('longitude')
-                    ->label('Long')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\IconColumn::make('is_late_check_in')
+                    ->label('Telat Masuk')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-exclamation-circle')
+                    ->falseIcon('heroicon-o-check-circle')
+                    ->trueColor('danger')
+                    ->falseColor('success'),
+                Tables\Columns\IconColumn::make('is_late_check_out')
+                    ->label('Telat Pulang')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-exclamation-circle')
+                    ->falseIcon('heroicon-o-check-circle')
+                    ->trueColor('danger')
+                    ->falseColor('success'),
+                Tables\Columns\TextColumn::make('late_duration_minutes')
+                    ->label('Total Telat (Menit)')
+                    ->badge()
+                    ->color('danger')
+                    ->default('-'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime('d M Y H:i')
@@ -117,6 +131,16 @@ class PresensiResource extends Resource
                         'sakit' => 'Sakit',
                         'alpha' => 'Alpha',
                     ]),
+                Tables\Filters\Filter::make('terlambat')
+                    ->label('Terlambat')
+                    ->query(fn ($query) => $query->where(function($q) {
+                        $q->where('is_late_check_in', true)
+                          ->orWhere('is_late_check_out', true);
+                    })),
+                Tables\Filters\Filter::make('tepat_waktu')
+                    ->label('Tepat Waktu')
+                    ->query(fn ($query) => $query->where('is_late_check_in', false)
+                        ->where('is_late_check_out', false)),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -144,6 +168,13 @@ class PresensiResource extends Resource
             'index' => Pages\ListPresensis::route('/'),
             'create' => Pages\CreatePresensi::route('/create'),
             'edit' => Pages\EditPresensi::route('/{record}/edit'),
+        ];
+    }
+    
+    public static function getWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\LaporanPresensi::class,
         ];
     }
 }

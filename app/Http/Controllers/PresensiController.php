@@ -17,8 +17,13 @@ class PresensiController extends Controller
         $izin = Presensi::where('tanggal', $today)->where('status', 'izin')->count();
         $sakit = Presensi::where('tanggal', $today)->where('status', 'sakit')->count();
         $alpha = $totalPegawai - ($hadir + $izin + $sakit);
+        $terlambat = Presensi::where('tanggal', $today)
+            ->where(function($query) {
+                $query->where('is_late_check_in', true)
+                      ->orWhere('is_late_check_out', true);
+            })->count();
 
-        return view('presensi.index', compact('totalPegawai', 'hadir', 'izin', 'sakit', 'alpha'));
+        return view('presensi.index', compact('totalPegawai', 'hadir', 'izin', 'sakit', 'alpha', 'terlambat'));
     }
 
     public function form()
@@ -62,11 +67,20 @@ class PresensiController extends Controller
             $presensi->jam_masuk = $request->jam_masuk_manual 
                 ? $request->jam_masuk_manual 
                 : Carbon::now()->format('H:i:s');
+            
+            // Cek keterlambatan check-in
+            $presensi->checkLateCheckIn();
         }
         
         $presensi->save();
 
-        return redirect()->route('presensi.index')->with('success', 'Presensi berhasil disimpan!');
+        // Buat pesan dengan info keterlambatan
+        $message = 'Presensi berhasil disimpan!';
+        if ($presensi->is_late_check_in) {
+            $message .= ' (Terlambat check-in ' . $presensi->late_duration_minutes . ' menit)';
+        }
+
+        return redirect()->route('presensi.index')->with('success', $message);
     }
 
     public function checkout(Request $request)
@@ -88,8 +102,18 @@ class PresensiController extends Controller
         }
 
         $presensi->jam_keluar = Carbon::now()->format('H:i:s');
+        
+        // Cek keterlambatan check-out
+        $presensi->checkLateCheckOut();
         $presensi->save();
 
-        return redirect()->route('presensi.index')->with('success', 'Check-out berhasil!');
+        // Buat pesan dengan info keterlambatan
+        $message = 'Check-out berhasil!';
+        if ($presensi->is_late_check_out) {
+            $lateMinutes = Carbon::parse($presensi->jam_keluar)->diffInMinutes(Carbon::parse(Presensi::CHECK_OUT_TIME));
+            $message .= ' (Pulang terlalu cepat ' . $lateMinutes . ' menit)';
+        }
+
+        return redirect()->route('presensi.index')->with('success', $message);
     }
 }
